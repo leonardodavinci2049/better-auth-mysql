@@ -1,10 +1,10 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -21,34 +21,34 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import Link from "next/link";
-import { Input } from "@/components/ui/input";
 
-// ✅ Usar cliente auth em vez de função de servidor
-import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
+import { signUp } from "@/server/users";
+
+import { z } from "zod";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { signIn } from "@/server/users";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import Link from "next/link";
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(8, {
-    message: "Password must be at least 8 characters.",
-  }),
+  username: z.string().min(3),
+  email: z.string().email(),
+  password: z.string().min(8),
 });
 
-export function LoginForm({
+export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
-  // 1. Define your form.
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      username: "",
       email: "",
       password: "",
     },
@@ -64,11 +64,17 @@ export function LoginForm({
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
-    const { success, message } = await signIn(values.email, values.password);
+    const { success, message } = await signUp(
+      values.email,
+      values.password,
+      values.username
+    );
 
     if (success) {
-      toast.success(message as string);
-      //  router.push("/dashboard");
+      toast.success(
+        `${message as string} Please check your email for verification.`
+      );
+      router.push("/dashboard");
     } else {
       toast.error(message as string);
     }
@@ -81,9 +87,7 @@ export function LoginForm({
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Welcome back</CardTitle>
-          <CardDescription>
-            Login with your Apple or Google account
-          </CardDescription>
+          <CardDescription>Signup with your Google account</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -102,7 +106,7 @@ export function LoginForm({
                         fill="currentColor"
                       />
                     </svg>
-                    Login with Google
+                    Signup with Google
                   </Button>
                 </div>
                 <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
@@ -112,6 +116,20 @@ export function LoginForm({
                 </div>
                 <div className="grid gap-6">
                   <div className="grid gap-3">
+                    <FormField
+                      control={form.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Username</FormLabel>
+                          <FormControl>
+                            <Input placeholder="shadcn" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     <FormField
                       control={form.control}
                       name="email"
@@ -157,14 +175,14 @@ export function LoginForm({
                     {isLoading ? (
                       <Loader2 className="size-4 animate-spin" />
                     ) : (
-                      "Login"
+                      "Signup"
                     )}
                   </Button>
                 </div>
                 <div className="text-center text-sm">
-                  Don&apos;t have an account?{" "}
-                  <Link href="/signup" className="underline underline-offset-4">
-                    Sign up
+                  Already have an account?{" "}
+                  <Link href="/login" className="underline underline-offset-4">
+                    Login
                   </Link>
                 </div>
               </div>
@@ -173,8 +191,9 @@ export function LoginForm({
         </CardContent>
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        By clicking continue, you agree to our{" "}
+        <Link href="#">Terms of Service</Link> and{" "}
+        <Link href="#">Privacy Policy</Link>.
       </div>
     </div>
   );
