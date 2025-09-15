@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 // import OpenAIService from "@/services/api/openai/openai-service";
 // import type { ChatMessage } from "@/services/api/openai/openai-service";
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     return NextResponse.json(
       { success: false, error: "Serviço de chat não implementado ainda" },
