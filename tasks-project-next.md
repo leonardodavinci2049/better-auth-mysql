@@ -8,7 +8,7 @@ git flow feature finish featr-03 -- só use se estiver tudo ok, ou apena der com
 
 git flow release start rls-03
 -- finish release
-git flow release finish rls-3
+git flow release finish rls-03
 Release rls-03 Completed
 
 git push origin main develop --follow-tags
