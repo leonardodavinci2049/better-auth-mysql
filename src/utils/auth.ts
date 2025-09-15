@@ -8,14 +8,20 @@ export const auth = betterAuth({
   // ✅ Usar process.env diretamente para configurações do servidor
   secret: process.env.BETTER_AUTH_SECRET!,
   baseURL: process.env.BETTER_AUTH_URL!,
+  socialProviders: {
+        google: { 
+            clientId: process.env.GOOGLE_CLIENT_ID as string, 
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
+        }, 
+    },
 
   emailAndPassword: {
     enabled: true,
   },
 
   database: drizzleAdapter(db, {
-    provider: "pg", // or "mysql", "sqlite"
-    schema, // optional, default is "public"
+    provider: "pg", 
+    schema, 
   }),
   plugins: [nextCookies()],
 });
